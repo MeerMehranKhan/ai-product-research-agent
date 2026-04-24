@@ -1,0 +1,113 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT_DIR / "data"
+SNAPSHOT_DIR = DATA_DIR / "snapshots"
+EXPORT_DIR = DATA_DIR / "exports"
+DB_PATH = ROOT_DIR / "storage" / "analysis_history.db"
+
+BASE_WEIGHTS = {
+    "demand": 0.28,
+    "competition": 0.22,
+    "profit": 0.20,
+    "virality": 0.15,
+    "saturation": 0.15,
+}
+
+MAX_IMPACTS = {
+    "demand": 20.0,
+    "competition": 18.0,
+    "profit": 16.0,
+    "virality": 14.0,
+    "saturation": 16.0,
+}
+
+PLATFORM_FEE_RULES = {
+    "Shopify": {"pct": 0.029, "fixed": 0.30},
+    "Amazon": {"pct": 0.15, "fixed": 1.80},
+    "TikTok Shop": {"pct": 0.08, "fixed": 0.50},
+    "TikTok": {"pct": 0.08, "fixed": 0.50},
+    "Other": {"pct": 0.05, "fixed": 0.45},
+}
+
+MARKET_SHIPPING_BASE = {
+    "US": 3.4,
+    "EU": 4.2,
+    "Global": 5.0,
+    "UK": 3.8,
+    "Other": 4.5,
+}
+
+MARKET_COMPETITIVENESS = {
+    "US": "high",
+    "EU": "high",
+    "Global": "medium",
+    "UK": "medium",
+    "Other": "medium",
+}
+
+CATEGORY_COST_RATIO = {
+    "Beauty": 0.24,
+    "Home": 0.31,
+    "Kitchen": 0.29,
+    "Office": 0.34,
+    "Pet Care": 0.28,
+    "Fitness": 0.26,
+    "Baby": 0.33,
+    "Auto": 0.35,
+    "Tech": 0.42,
+    "Travel": 0.30,
+    "Garden": 0.32,
+}
+
+CATEGORY_COMPLEXITY = {
+    "Beauty": 28.0,
+    "Home": 40.0,
+    "Kitchen": 38.0,
+    "Office": 26.0,
+    "Pet Care": 34.0,
+    "Fitness": 30.0,
+    "Baby": 46.0,
+    "Auto": 44.0,
+    "Tech": 52.0,
+    "Travel": 32.0,
+    "Garden": 36.0,
+}
+
+SOURCE_KIND_CONFIDENCE = {
+    "live_scrape": 0.90,
+    "snapshot": 0.75,
+    "offline_fallback": 0.60,
+}
+
+PLATFORM_FIT_COLUMNS = {
+    "Shopify": "platform_fit_shopify",
+    "Amazon": "platform_fit_amazon",
+    "TikTok": "platform_fit_tiktok",
+    "TikTok Shop": "platform_fit_tiktok",
+}
+
+ADJACENT_TERMS = {
+    "pet": ["pet grooming", "dog accessory", "cat care", "pet cleaning"],
+    "beauty": ["self care", "skin tool", "beauty gadget", "grooming"],
+    "foam": ["recovery", "mobility", "stretch", "massage roller"],
+    "gym": ["home workout", "strength training", "recovery", "mobility"],
+    "kitchen": ["home organization", "meal prep", "clean kitchen", "storage"],
+    "office": ["workspace", "desk setup", "remote work", "productivity"],
+    "resistance": ["strength training", "mobility", "stretch", "recovery"],
+    "fitness": ["recovery", "mobility", "home workout", "wellness"],
+    "travel": ["car organizer", "commuter", "portable storage", "carry-on"],
+}
+
+GENERIC_DISCOVERY_TERMS = [
+    "problem solver",
+    "home upgrade",
+    "viral gadget",
+    "daily use product",
+]
+
+BEGINNER_FRIENDLY_COMPLEXITY_MAX = 38.0
+BEGINNER_FRIENDLY_MARGIN_MIN = 32.0

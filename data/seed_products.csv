@@ -1,0 +1,31 @@
+name,category,price,engagement_proxy,demand_proxy,competition_proxy,virality_proxy,saturation_proxy,source,source_kind,supplier_cost,novelty,product_type,operational_complexity,audience_hint,trend_region,keywords,platform_fit_shopify,platform_fit_amazon,platform_fit_tiktok,platform_fit_other,source_confidence
+Self-Cleaning Slicker Brush,Pet Care,24.99,84,80,62,58,54,offline_catalog,offline_fallback,6.40,61,consumer,30,Pet owners dealing with heavy shedding,US,"pet,grooming,shedding,dog",78,82,55,60,0.60
+Portable Blender Bottle,Kitchen,29.99,77,73,48,72,46,offline_catalog,offline_fallback,8.80,67,consumer,33,Health-conscious commuters and gym-goers,Global,"smoothie,portable,fitness,kitchen",84,58,81,62,0.60
+LED Toothpaste Dispenser,Home,18.99,71,68,52,64,49,offline_catalog,offline_fallback,4.20,59,consumer,24,Apartment renters and family households,EU,"bathroom,organization,cleaning",74,60,66,58,0.60
+Ergonomic Foot Rest Cushion,Office,39.99,65,69,43,40,37,offline_catalog,offline_fallback,12.10,53,consumer,21,Remote workers with long desk hours,US,"desk,comfort,office,remote work",79,72,42,63,0.60
+Reusable Lint Remover Pro,Home,19.99,69,72,39,55,34,offline_catalog,offline_fallback,3.85,58,consumer,18,Home organizers and pet households,US,"cleaning,lint,pet hair,reusable",80,64,59,57,0.60
+Car Seat Gap Organizer,Auto,27.99,73,70,57,44,51,offline_catalog,offline_fallback,8.30,51,consumer,29,Drivers who want clutter-free cars,Global,"car,organizer,storage,commuter",76,71,45,56,0.60
+Magnetic Screen Door Closer,Home,22.99,68,74,36,48,33,offline_catalog,offline_fallback,5.60,65,consumer,27,Households with pets and kids,US,"home,door,summer,bug control",75,54,47,55,0.60
+Neck Cooling Fan,Travel,34.99,88,79,66,82,63,offline_catalog,offline_fallback,10.60,64,consumer,35,Commuters and outdoor workers in warm climates,Global,"summer,cooling,portable,travel",81,63,88,60,0.60
+Under Desk Cable Hammock,Office,21.99,63,67,28,41,29,offline_catalog,offline_fallback,4.90,71,consumer,16,Remote workers improving desk aesthetics,US,"desk,cable,organization,workspace",83,52,49,61,0.60
+Posture Corrector Brace,Fitness,32.99,74,66,78,46,76,offline_catalog,offline_fallback,7.20,37,consumer,25,Adults seeking quick posture support,Global,"fitness,posture,wellness,brace",69,75,54,52,0.60
+Portable Label Printer,Office,49.99,82,77,58,63,56,offline_catalog,offline_fallback,16.50,70,consumer,26,Small business owners and organizers,US,"label,organization,shipping,office",86,79,68,65,0.60
+Shower Tile Scrubber Kit,Home,26.99,61,70,34,39,30,offline_catalog,offline_fallback,7.60,57,consumer,32,Busy households that want faster cleaning,EU,"cleaning,bathroom,home,tool",77,57,40,58,0.60
+Pet Hair Remover Roller,Pet Care,19.49,79,76,46,52,41,offline_catalog,offline_fallback,3.60,55,consumer,19,Pet households with furniture shedding,US,"pet hair,cleaning,roller,home",83,69,58,59,0.60
+Silicone Baby Feeding Set,Baby,29.49,66,71,44,47,43,offline_catalog,offline_fallback,9.80,54,consumer,42,Parents buying safer mealtime tools,US,"baby,feeding,silicone,parenting",72,68,43,54,0.60
+Mini Projector,Tech,89.99,92,81,84,79,82,offline_catalog,offline_fallback,42.00,49,consumer,58,Entertainment shoppers chasing gadget deals,Global,"projector,gadget,home theater,tech",74,83,76,60,0.60
+Electric Scalp Massager,Beauty,31.99,86,78,51,74,45,offline_catalog,offline_fallback,9.20,68,consumer,23,Beauty buyers focused on self-care rituals,US,"beauty,self care,massage,wellness",85,61,83,58,0.60
+Heated Eyelash Curler,Beauty,25.99,73,69,47,70,44,offline_catalog,offline_fallback,4.90,63,consumer,21,Beauty shoppers seeking quick routine upgrades,EU,"beauty,makeup,lash,gadget",80,57,82,55,0.60
+Collapsible Laptop Stand,Office,33.99,72,74,42,50,38,offline_catalog,offline_fallback,8.70,60,consumer,20,Remote professionals improving ergonomics,Global,"desk,laptop,remote work,ergonomic",84,73,52,61,0.60
+Pantry Organizer Bins,Kitchen,27.49,67,70,59,34,56,offline_catalog,offline_fallback,8.10,46,consumer,24,Home organization buyers,US,"organization,kitchen,storage,pantry",71,63,32,56,0.60
+Cordless Handheld Vacuum,Home,59.99,81,75,72,61,69,offline_catalog,offline_fallback,24.50,52,consumer,48,Busy households who want fast spot cleaning,Global,"cleaning,home,vacuum,portable",73,79,67,58,0.60
+Smart Water Bottle,Fitness,44.99,64,66,53,62,48,offline_catalog,offline_fallback,15.20,66,consumer,34,Fitness and wellness shoppers who like habit tracking,Global,"water bottle,fitness,smart,hydration",77,56,75,57,0.60
+Ice Roller for Face,Beauty,17.99,76,72,41,68,38,offline_catalog,offline_fallback,3.90,62,consumer,16,Beauty shoppers looking for low-cost ritual tools,US,"beauty,face,skincare,cooling",82,49,85,53,0.60
+Dog Slow Feeder Bowl,Pet Care,21.49,58,67,29,33,28,offline_catalog,offline_fallback,5.10,52,consumer,17,Dog owners focused on healthier feeding habits,US,"dog,feeding,pet health,slow feeder",74,66,30,54,0.60
+Yoga Stretch Strap,Fitness,16.99,60,64,31,37,29,offline_catalog,offline_fallback,2.70,45,consumer,14,Wellness buyers recovering at home,EU,"fitness,recovery,stretch,yoga",70,52,48,50,0.60
+Plant Propagation Station,Garden,24.49,62,68,35,45,31,offline_catalog,offline_fallback,6.40,69,consumer,18,Home decor buyers who enjoy low-maintenance plants,Global,"plant,decor,garden,home",79,46,57,55,0.60
+Kitchen Sink Splash Guard,Kitchen,18.49,75,74,33,60,32,offline_catalog,offline_fallback,3.50,64,consumer,15,Renters and busy home cooks,US,"kitchen,cleaning,sink,organization",82,55,69,56,0.60
+Reusable Makeup Remover Pads,Beauty,15.99,59,65,37,44,35,offline_catalog,offline_fallback,2.20,43,consumer,12,Eco-conscious beauty shoppers,Global,"beauty,reusable,eco,skincare",74,51,52,53,0.60
+Desk Cable Clip Set,Office,14.99,57,63,26,36,27,offline_catalog,offline_fallback,1.80,49,consumer,10,Remote workers reducing desk clutter,US,"desk,cable,organization,accessory",76,44,31,49,0.60
+Foldable Trunk Organizer,Auto,37.99,64,71,41,35,37,offline_catalog,offline_fallback,11.80,57,consumer,28,Family drivers and rideshare workers,US,"car,storage,organizer,travel",74,70,29,55,0.60
+Wrinkle Release Laundry Sheets,Home,23.99,70,73,38,58,35,offline_catalog,offline_fallback,5.40,72,consumer,22,Travelers and busy professionals,Global,"laundry,travel,convenience,home",81,50,71,54,0.60
