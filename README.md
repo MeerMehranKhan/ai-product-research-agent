@@ -71,10 +71,6 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3. Optional API keys
-
-Copy `.env.example` to `.env` and add `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` if you want to extend the insight layer later. The app works without keys.
-
 ## Running The App
 
 ### Streamlit UI
