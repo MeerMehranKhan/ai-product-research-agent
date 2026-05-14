@@ -300,24 +300,42 @@ class ProductResearchOrchestrator:
     ) -> list[dict[str, object]]:
         if scored.empty:
             return []
-        # Composite ranking: blend opportunity score with niche relevance
         scored = scored.copy()
-        scored["_rank_score"] = 0.65 * scored["opportunity_score"] + 0.35 * scored["niche_fit"]
-        ranked = scored.sort_values(
-            ["_rank_score", "opportunity_score", "confidence_score", "discovery_gap_score"],
-            ascending=False,
-        )
+
+        # When a niche is specified, partition into on-topic and off-topic
+        if request.niche:
+            on_topic = scored[scored["niche_fit"] >= 40].copy()
+            off_topic = scored[scored["niche_fit"] < 40].copy()
+            # Composite ranking: blend opportunity score with niche relevance
+            if not on_topic.empty:
+                on_topic["_rank_score"] = 0.50 * on_topic["opportunity_score"] + 0.50 * on_topic["niche_fit"]
+                on_topic = on_topic.sort_values(
+                    ["_rank_score", "opportunity_score", "confidence_score"],
+                    ascending=False,
+                )
+            # Only fall back to off-topic products when on-topic pool is very sparse
+            if len(on_topic) >= 3:
+                ranked = on_topic
+            else:
+                off_topic["_rank_score"] = off_topic["opportunity_score"] * 0.5
+                ranked = pd.concat([on_topic, off_topic]).sort_values("_rank_score", ascending=False)
+        else:
+            scored["_rank_score"] = scored["opportunity_score"]
+            ranked = scored.sort_values(
+                ["_rank_score", "confidence_score", "discovery_gap_score"],
+                ascending=False,
+            )
+
         selected_rows = []
         category_counts: dict[str, int] = {}
-        # Allow more products from niche-relevant categories
+        # Determine niche-relevant categories for caps
         niche_relevant_categories = set()
-        if request.niche:
-            median_fit = ranked["niche_fit"].median()
-            high_fit = ranked[ranked["niche_fit"] > median_fit]
+        if request.niche and not ranked.empty:
+            high_fit = ranked[ranked["niche_fit"] >= ranked["niche_fit"].quantile(0.5)]
             niche_relevant_categories = set(high_fit["category"].unique())
         for row in ranked.to_dict(orient="records"):
             category = str(row["category"])
-            max_for_cat = 3 if category in niche_relevant_categories else 2
+            max_for_cat = 3 if category in niche_relevant_categories else 1
             if ranked["category"].nunique() <= 2:
                 max_for_cat = request.top_n
             if category_counts.get(category, 0) >= max_for_cat and len(selected_rows) < request.top_n:
@@ -326,14 +344,6 @@ class ProductResearchOrchestrator:
             selected_rows.append(row)
             if len(selected_rows) >= request.top_n:
                 break
-        if len(selected_rows) < request.top_n:
-            selected_slugs = {row["product_slug"] for row in selected_rows}
-            for row in ranked.to_dict(orient="records"):
-                if row["product_slug"] in selected_slugs:
-                    continue
-                selected_rows.append(row)
-                if len(selected_rows) >= request.top_n:
-                    break
 
         products = []
         for row in selected_rows:
@@ -353,7 +363,7 @@ class ProductResearchOrchestrator:
         selected_slugs = {product["product_slug"] for product in top_products}
         remaining = scored[~scored["product_slug"].isin(selected_slugs)].copy()
         remaining["avoid_reason"] = remaining.apply(self._avoid_reason, axis=1)
-        avoided = remaining.sort_values(["risk_level", "raw_competition", "opportunity_score"], ascending=[False, False, True]).head(8)
+        avoided = remaining.sort_values(["risk_level", "raw_competition", "opportunity_score"], ascending=[False, False, True]).head(10)
         return self._serialize_avoided(avoided, None)
 
     def _serialize_avoided(self, frame: pd.DataFrame, fallback_reason: str | None) -> list[dict[str, object]]:
@@ -381,6 +391,8 @@ class ProductResearchOrchestrator:
     def _avoid_reason(row: pd.Series) -> str:
         if not bool(row["economics_pass"]):
             return "Margins are too thin for a safe first test."
+        if row.get("niche_fit", 60) < 40:
+            return "Not relevant enough to the target niche."
         if row["risk_level"] == "High":
             return "Confidence is too low or operational risk is too high."
         if row["raw_competition"] > 75:
@@ -388,3 +400,4 @@ class ProductResearchOrchestrator:
         if row["raw_saturation"] > 70:
             return "Category saturation is too elevated."
         return "Other options offer a better mix of confidence, margin, and room to grow."
+
