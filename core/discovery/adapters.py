@@ -105,11 +105,12 @@ class SnapshotAdapter(DiscoveryAdapter):
 
         filtered: list[CandidateProduct] = []
         for card in cards:
-            match = niche_match_score(
-                request.niche,
-                [card.name, card.category, " ".join(card.keywords)],
-            )
-            if match >= 20 or any(term in normalize_text(card.name) for term in map(normalize_text, search_terms)):
+            card_texts = [card.name, card.category, " ".join(card.keywords)]
+            match = niche_match_score(request.niche, card_texts)
+            query_match = best_query_match_score(search_terms, card_texts)
+            term_in_name = any(term in normalize_text(card.name) for term in map(normalize_text, search_terms))
+            term_in_category = any(term in normalize_text(card.category) for term in map(normalize_text, search_terms))
+            if match >= 15 or query_match >= 15 or term_in_name or term_in_category:
                 filtered.append(card)
         return filtered
 
@@ -156,16 +157,28 @@ class OfflineCatalogAdapter(DiscoveryAdapter):
         if prioritize_long_tail:
             frame["selection_score"] += 0.20 * frame["long_tail_bonus"] + 0.10 * frame["novelty"]
 
+        # Combined relevance: use the better of niche_match and search_match
+        frame["combined_relevance"] = frame[["niche_match", "search_match"]].max(axis=1)
+
         if request.niche:
-            niche_threshold = 18.0 if not relax_niche else 12.0
+            niche_threshold = 15.0 if not relax_niche else 8.0
+            # Try niche_match first
             filtered = frame[frame["niche_match"] >= niche_threshold]
+            # If niche_match is too narrow, fall back to search_match
+            if len(filtered) < 5:
+                search_fallback = frame[frame["search_match"] >= niche_threshold]
+                filtered = pd.concat([filtered, search_fallback]).drop_duplicates(subset=["name"])
+            # If still too narrow, use combined_relevance
+            if len(filtered) < 5:
+                relevance_fallback = frame[frame["combined_relevance"] >= niche_threshold * 0.6]
+                filtered = pd.concat([filtered, relevance_fallback]).drop_duplicates(subset=["name"])
         else:
             filtered = frame
 
         if filtered.empty:
-            filtered = frame.sort_values(["niche_match", "platform_match", "demand_proxy"], ascending=False).head(top_k)
+            filtered = frame.sort_values(["combined_relevance", "platform_match", "demand_proxy"], ascending=False).head(top_k)
         else:
-            filtered = filtered.sort_values(["niche_match", "selection_score"], ascending=False).head(top_k)
+            filtered = filtered.sort_values(["combined_relevance", "selection_score"], ascending=False).head(top_k)
 
         records: list[CandidateProduct] = []
         for row in filtered.to_dict(orient="records"):
