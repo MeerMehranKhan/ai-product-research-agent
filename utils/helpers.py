@@ -33,19 +33,19 @@ GENERIC_QUERY_TOKENS = {
 }
 
 CATEGORY_SYNONYMS: dict[str, set[str]] = {
-    "pet": {"pet care", "pet", "dog", "cat", "puppy"},
-    "beauty": {"beauty", "skincare", "makeup", "cosmetic", "self care"},
-    "kitchen": {"kitchen", "cooking", "meal prep", "food"},
+    "pet": {"pet care", "pet", "dog", "cat", "puppy", "shedding"},
+    "beauty": {"beauty", "skincare", "makeup", "cosmetic", "self care", "scalp", "face", "eyelash"},
+    "kitchen": {"kitchen", "cooking", "meal prep", "food", "blender"},
     "fitness": {"fitness", "gym", "workout", "exercise", "recovery", "wellness"},
     "office": {"office", "desk", "workspace", "remote work"},
-    "home": {"home", "household", "cleaning", "organization"},
+    "home": {"home", "household", "organization"},
     "tech": {"tech", "electronic", "gadget", "smart"},
     "travel": {"travel", "commuter", "portable", "car"},
     "baby": {"baby", "infant", "parenting", "child"},
     "garden": {"garden", "plant", "outdoor"},
     "auto": {"auto", "car", "vehicle", "automotive"},
-    "grooming": {"grooming", "pet care", "beauty", "self care", "cleaning"},
-    "cleaning": {"cleaning", "home", "lint", "vacuum", "scrubber"},
+    "grooming": {"grooming", "pet care", "pet", "shedding", "brush"},
+    "cleaning": {"cleaning", "lint", "vacuum", "scrubber"},
 }
 
 
@@ -147,6 +147,7 @@ def _category_synonym_bonus(phrase_tokens: list[str], candidate_tokens: set[str]
     """Return a bonus score (0-50) when phrase tokens map to a category synonym group
     that also covers one or more candidate tokens."""
     bonus = 0.0
+    normalized_raw = normalize_text(raw_candidate_text)
     for token in phrase_tokens:
         related = CATEGORY_SYNONYMS.get(token)
         if not related:
@@ -154,9 +155,9 @@ def _category_synonym_bonus(phrase_tokens: list[str], candidate_tokens: set[str]
         # Check if any candidate token or raw text belongs to the same synonym group
         for synonym in related:
             syn_tokens = set(normalize_text(synonym).split())
-            # For multi-word synonyms, require ALL tokens to be present
+            # For multi-word synonyms, require contiguous phrase in raw text
             if len(syn_tokens) > 1:
-                if syn_tokens.issubset(candidate_tokens) or synonym in raw_candidate_text:
+                if synonym in normalized_raw:
                     bonus = max(bonus, 40.0)
                     break
             else:
