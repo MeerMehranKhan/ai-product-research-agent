@@ -15,6 +15,7 @@ from agents.orchestrator import ProductResearchOrchestrator
 from core.models import ResearchRequest
 from storage.db import ResearchRepository
 from ui.components import (
+    render_app_header,
     render_app_intro,
     render_avoided_products,
     render_empty_results,
@@ -31,7 +32,7 @@ from ui.theme import inject_theme
 def main() -> None:
     st.set_page_config(
         page_title="AI Product Research Agent",
-        page_icon="AI",
+        page_icon="🔍",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -40,8 +41,7 @@ def main() -> None:
     repository = ResearchRepository()
     orchestrator = ProductResearchOrchestrator(repository=repository)
 
-    st.title("AI Product Research Agent")
-    st.caption("Adaptive opportunity discovery for dropshipping, Shopify, Amazon, and social commerce.")
+    render_app_header()
     render_app_intro()
 
     _init_session()
@@ -49,15 +49,6 @@ def main() -> None:
     if selected_run_id and st.sidebar.button("Load selected run", use_container_width=True):
         st.session_state["active_run"] = repository.get_run(selected_run_id)
 
-    st.markdown(
-        """
-        <div class="form-shell">
-            <div class="eyebrow">Research Setup</div>
-            <div class="muted">Use focused phrases so the shortlist stays relevant and easier to trust.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
     with st.form("research_form", clear_on_submit=False):
         col1, col2, col3, col4, col5 = st.columns([2.2, 1.2, 1.1, 1.2, 0.8])
         niche = col1.text_input("Niche", value=st.session_state.get("niche", ""), placeholder="pet grooming, beauty, kitchen gadgets")
@@ -66,7 +57,6 @@ def main() -> None:
         platform = col4.selectbox("Platform", options=["Shopify", "Amazon", "TikTok", "TikTok Shop", "Other"], index=0)
         top_n = col5.number_input("Top N", min_value=3, max_value=10, value=5)
         submitted = st.form_submit_button("Run Agent", use_container_width=True)
-    st.caption("Tip: use comma-separated product phrases like `phone cases, laptop stands, USB hubs` or `resistance bands, foam rollers`.")
 
     if submitted:
         request = ResearchRequest(
@@ -84,7 +74,6 @@ def main() -> None:
 
     active_run = st.session_state.get("active_run")
     if not active_run:
-        st.info("Run the agent to generate opportunities, avoided products, and an execution plan.")
         return
 
     products = active_run.get("top_products", [])

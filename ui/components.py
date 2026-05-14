@@ -11,17 +11,30 @@ except ImportError:  # pragma: no cover - optional during local verification
     go = None
 
 
+def render_app_header() -> None:
+    st.markdown(
+        """
+        <div class="app-brand">
+            <div class="app-brand-icon">AI</div>
+            <div class="app-brand-text">Product Research Agent</div>
+        </div>
+        <div class="app-subtitle">Adaptive opportunity discovery for dropshipping, Shopify, Amazon, and social commerce.</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def render_app_intro() -> None:
     st.markdown(
         """
         <div class="intro-card">
-            <div class="eyebrow">Search Better</div>
-            <div class="intro-title">Describe a product lane with 2-4 focused phrases.</div>
-            <div class="hero-subtitle">Comma-separated phrases work best. They help the agent stay on-topic and reduce generic spillover.</div>
+            <div class="eyebrow">How It Works</div>
+            <div class="intro-title">Describe a product lane with 2–4 focused phrases.</div>
+            <div class="hero-subtitle">Comma-separated phrases help the agent stay on-topic and reduce generic spillover.</div>
             <div class="chip-row">
                 <span class="intro-chip">phone cases, laptop stands, USB hubs</span>
-                <span class="intro-chip">home gym equipment, resistance bands, foam rollers</span>
-                <span class="intro-chip">pet grooming, dog cleaning tools, shedding control</span>
+                <span class="intro-chip">home gym equipment, resistance bands</span>
+                <span class="intro-chip">pet grooming, dog cleaning tools</span>
             </div>
         </div>
         """,
@@ -33,15 +46,21 @@ def render_run_summary(run: dict[str, object]) -> None:
     request = run.get("request", {})
     products = run.get("top_products", [])
     avoided = run.get("avoided_products", [])
-    summary_cols = st.columns(4)
+    outcome = str(run.get("outcome", "pending")).lower()
+
+    outcome_class = "outcome-go" if outcome == "go" else ("outcome-caution" if outcome == "caution" else "outcome-avoid")
+    outcome_html = f'<span class="outcome-badge {outcome_class}">{outcome.title()}</span>'
+
+    st.markdown(f'<div class="section-header">Run Summary</div>', unsafe_allow_html=True)
+    summary_cols = st.columns(5)
     summary_cols[0].metric("Niche", str(request.get("niche") or "All niches"))
     summary_cols[1].metric("Market / Platform", f"{request.get('market', 'US')} / {request.get('platform', 'Shopify')}")
     summary_cols[2].metric("Opportunities", len(products))
     summary_cols[3].metric("Rejected", len(avoided))
-    st.caption(
-        f"Run outcome: {str(run.get('outcome', 'pending')).title()} | Budget: "
-        f"{format_currency(float(request.get('budget_min', 0.0)))} to {format_currency(float(request.get('budget_max', 0.0)))}"
-    )
+    summary_cols[4].markdown(f"**Outcome**\n\n{outcome_html}", unsafe_allow_html=True)
+
+    budget_text = f"{format_currency(float(request.get('budget_min', 0.0)))} – {format_currency(float(request.get('budget_max', 0.0)))}"
+    st.caption(f"Budget range: {budget_text}")
 
 
 def render_top_opportunity(product: dict[str, object]) -> None:
@@ -67,7 +86,7 @@ def render_top_opportunity(product: dict[str, object]) -> None:
 
 def render_run_story(run: dict[str, object]) -> None:
     insights = run.get("run_insights", {})
-    st.markdown("**Run-Level Insights**")
+    st.markdown('<div class="section-header">Run-Level Insights</div>', unsafe_allow_html=True)
     insight_cols = st.columns(4)
     insight_cols[0].metric("Best Opportunity", _nested_name(insights.get("best_opportunity")))
     insight_cols[1].metric("Safest Opportunity", _nested_name(insights.get("safest_opportunity")))
@@ -82,7 +101,8 @@ def render_run_story(run: dict[str, object]) -> None:
 def render_product_dashboard(products: list[dict[str, object]]) -> None:
     if not products:
         return
-    st.markdown("**Opportunity Snapshot**")
+    st.markdown('<div class="visual-divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Opportunity Snapshot</div>', unsafe_allow_html=True)
     render_product_highlights(products[:3])
     render_run_charts(products)
 
@@ -94,7 +114,7 @@ def render_product_highlights(products: list[dict[str, object]]) -> None:
             f"""
             <div class="mini-card">
                 <div class="mini-card-title">{product['name']}</div>
-                <div class="mini-card-score">Score {product['opportunity_score']:.1f} | Confidence {product['confidence_score']:.1f}</div>
+                <div class="mini-card-score">Score {product['opportunity_score']:.1f} · Confidence {product['confidence_score']:.1f}</div>
                 <div class="muted">{product['surface_reasoning']}</div>
             </div>
             """,
@@ -103,13 +123,13 @@ def render_product_highlights(products: list[dict[str, object]]) -> None:
 
 
 def render_products(products: list[dict[str, object]]) -> None:
-    st.markdown("**Shortlist**")
+    st.markdown('<div class="section-header">Shortlist</div>', unsafe_allow_html=True)
     if not products:
         st.warning("No products cleared the current thresholds.")
         return
 
     for product in products:
-        with st.expander(f"{product['name']} | Score {product['opportunity_score']:.1f}", expanded=product is products[0]):
+        with st.expander(f"{product['name']}  ·  Score {product['opportunity_score']:.1f}", expanded=product is products[0]):
             tags = _badges(product)
             st.markdown(tags, unsafe_allow_html=True)
             summary_cols = st.columns(4)
@@ -125,9 +145,7 @@ def render_products(products: list[dict[str, object]]) -> None:
             with tabs[2]:
                 render_action_plan(product["action_plan"])
             with tabs[3]:
-                st.markdown(f"**Quick Read**  \n{product['surface_reasoning']}")
-                st.markdown(f"**Deeper Take**  \n{product['deep_reasoning']}")
-                st.markdown(f"**Strategic Fit**  \n{product['strategic_reasoning']}")
+                _render_reasoning(product)
 
 
 def render_empty_results(run: dict[str, object]) -> None:
@@ -146,18 +164,18 @@ def render_empty_results(run: dict[str, object]) -> None:
 
 
 def render_avoided_products(products: list[dict[str, object]]) -> None:
-    st.markdown("**Avoid These Products**")
+    st.markdown('<div class="section-header">Products to Avoid</div>', unsafe_allow_html=True)
     if not products:
         st.caption("No avoided products were captured for this run.")
         return
 
     columns = st.columns(2)
-    for index, product in enumerate(products[:6]):
+    for index, product in enumerate(products[:8]):
         column = columns[index % 2]
         column.markdown(
             f"""
             <div class="avoid-card">
-                <strong>{product['name']}</strong> | {product['category']}<br/>
+                <strong>{product['name']}</strong> <span class="muted">· {product['category']}</span><br/>
                 <span class="muted">{product['reason']}</span>
             </div>
             """,
@@ -192,32 +210,32 @@ def render_run_charts(products: list[dict[str, object]]) -> None:
                         "Risk: %{customdata[4]}<extra></extra>"
                     ),
                     marker=dict(
-                        size=(product_frame["confidence_score"] / 4).clip(lower=13),
+                        size=(product_frame["confidence_score"] / 4).clip(lower=14),
                         color=product_frame["discovery_gap_score"],
                         colorscale=[
                             [0.0, "#163c3c"],
                             [0.5, "#0ea5a5"],
-                            [1.0, "#7dd3fc"],
+                            [1.0, "#a5b4fc"],
                         ],
-                        colorbar=dict(title="Discovery Gap"),
+                        colorbar=dict(title="Discovery<br>Gap", thickness=12),
                         showscale=True,
-                        line=dict(color="rgba(8, 15, 28, 0.9)", width=1.2),
-                        opacity=0.9,
+                        line=dict(color="rgba(8, 15, 28, 0.85)", width=1),
+                        opacity=0.92,
                     ),
                 )
             ]
         )
         scatter.update_layout(
-            height=360,
-            title="Profitability vs Opportunity",
+            height=380,
+            title=dict(text="Profitability vs Opportunity", font=dict(size=13, color="#94a3b8")),
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(color="#e2e8f0"),
-            margin=dict(l=10, r=10, t=48, b=10),
-            xaxis=dict(title="Profit per Unit", gridcolor="rgba(148, 163, 184, 0.16)", zeroline=False),
-            yaxis=dict(title="Opportunity Score", gridcolor="rgba(148, 163, 184, 0.16)", zeroline=False),
+            plot_bgcolor="rgba(15,23,42,0.50)",
+            font=dict(color="#94a3b8", family="Inter, sans-serif", size=11),
+            margin=dict(l=10, r=10, t=44, b=10),
+            xaxis=dict(title="Profit per Unit", gridcolor="rgba(148, 163, 184, 0.08)", zeroline=False),
+            yaxis=dict(title="Opportunity Score", gridcolor="rgba(148, 163, 184, 0.08)", zeroline=False),
         )
-        st.plotly_chart(scatter, use_container_width=True)
+        st.plotly_chart(scatter, width="stretch")
 
     with right:
         ranked = product_frame.sort_values(["opportunity_score", "confidence_score"], ascending=[True, True]).copy()
@@ -250,35 +268,32 @@ def render_run_charts(products: list[dict[str, object]]) -> None:
                         ],
                         cmin=0,
                         cmax=100,
-                        colorbar=dict(title="Confidence"),
-                        line=dict(color="rgba(8, 15, 28, 0.92)", width=1.1),
+                        colorbar=dict(title="Confidence", thickness=12),
+                        line=dict(color="rgba(8, 15, 28, 0.85)", width=1),
                     ),
                 )
             ]
         )
         bar_chart.update_layout(
-            height=max(360, 76 * len(ranked.index)),
-            title="Top Opportunity Ranking",
+            height=max(380, 78 * len(ranked.index)),
+            title=dict(text="Opportunity Ranking", font=dict(size=13, color="#94a3b8")),
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(color="#e2e8f0"),
-            margin=dict(l=10, r=40, t=48, b=10),
+            plot_bgcolor="rgba(15,23,42,0.50)",
+            font=dict(color="#94a3b8", family="Inter, sans-serif", size=11),
+            margin=dict(l=10, r=40, t=44, b=10),
             xaxis=dict(
                 title="Opportunity Score",
-                gridcolor="rgba(148, 163, 184, 0.16)",
+                gridcolor="rgba(148, 163, 184, 0.08)",
                 zeroline=False,
                 range=[0, max(ranked["opportunity_score"].max() * 1.18, 10)],
             ),
             yaxis=dict(title=None, automargin=True),
         )
-        st.plotly_chart(bar_chart, use_container_width=True)
+        st.plotly_chart(bar_chart, width="stretch")
 
 
 def render_score_story(product: dict[str, object]) -> None:
     adjustments = product.get("factor_adjustments", {})
-    cols = st.columns(len(adjustments) or 1)
-    for idx, (factor, value) in enumerate(adjustments.items()):
-        cols[idx].metric(_display_label(factor), f"{value:+.1f}")
 
     if go is not None and adjustments:
         ranked_adjustments = sorted(adjustments.items(), key=lambda item: item[1])
@@ -291,24 +306,29 @@ def render_score_story(product: dict[str, object]) -> None:
                     text=[f"{value:+.1f}" for _, value in ranked_adjustments],
                     textposition="outside",
                     marker_color=["#22c55e" if value >= 0 else "#ef4444" for _, value in ranked_adjustments],
+                    marker_line=dict(width=0),
                 )
             ]
         )
         figure.update_layout(
-            height=max(220, 52 * len(ranked_adjustments)),
-            title="Factor Adjustments",
+            height=max(220, 48 * len(ranked_adjustments)),
+            title=dict(text="Factor Adjustments", font=dict(size=13, color="#94a3b8")),
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(15,23,42,0.6)",
-            font=dict(color="#e2e8f0"),
-            margin=dict(l=10, r=36, t=48, b=10),
-            xaxis=dict(gridcolor="rgba(148, 163, 184, 0.16)", zeroline=True, zerolinecolor="rgba(226, 232, 240, 0.35)"),
+            plot_bgcolor="rgba(15,23,42,0.50)",
+            font=dict(color="#94a3b8", family="Inter, sans-serif", size=11),
+            margin=dict(l=10, r=36, t=44, b=10),
+            xaxis=dict(gridcolor="rgba(148, 163, 184, 0.08)", zeroline=True, zerolinecolor="rgba(226, 232, 240, 0.20)"),
             yaxis=dict(title=None, automargin=True),
         )
-        st.plotly_chart(figure, use_container_width=True)
+        st.plotly_chart(figure, width="stretch")
 
-    for line in product.get("score_explanations", []):
-        st.write(f"- {line}")
-    st.caption(f"Weight mix: {product.get('weight_summary', '')}")
+    explanations = product.get("score_explanations", [])
+    if explanations:
+        for line in explanations:
+            st.write(f"- {line}")
+    weight_summary = product.get("weight_summary", "")
+    if weight_summary:
+        st.caption(f"Weight mix: {weight_summary}")
 
 
 def render_money_view(product: dict[str, object]) -> None:
@@ -318,25 +338,47 @@ def render_money_view(product: dict[str, object]) -> None:
     cols[2].metric("Platform Fee", format_currency(product["platform_fee_estimate"]))
     cols[3].metric("Break-Even Ad", format_currency(product["break_even_ad_cost"]))
     cols[4].metric("Target Ad Cost", format_currency(product["target_ad_cost"]))
-    st.write(
-        f"Estimated supplier cost: {format_currency(product['estimated_supplier_cost'])} | "
-        f"Profit per unit: {format_currency(product['estimated_profit_per_unit'])} | "
-        f"Pricing strategy: {product['pricing_strategy_suggestion']}"
+    st.markdown(
+        f"""
+        <div class="money-summary">
+            <span><strong>Supplier Cost:</strong> {format_currency(product['estimated_supplier_cost'])}</span>
+            <span><strong>Profit / Unit:</strong> {format_currency(product['estimated_profit_per_unit'])}</span>
+            <span><strong>Strategy:</strong> {product['pricing_strategy_suggestion']}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 
 def render_action_plan(action_plan: dict[str, object]) -> None:
-    st.markdown(f"**Target Persona**  \n{action_plan['target_persona']['label']}: {action_plan['target_persona']['pain_points']}")
-    for label, items in [
+    persona = action_plan["target_persona"]
+    st.markdown(
+        f"""
+        <div class="persona-card">
+            <div class="persona-label">{persona['label']}</div>
+            <div class="persona-pain">{persona['pain_points']}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    sections = [
         ("Demand Validation", action_plan["demand_validation_plan"]),
         ("Supplier Search", action_plan["supplier_search_plan"]),
         ("Store / Listing", action_plan["store_or_listing_plan"]),
         ("Launch Plan", action_plan["launch_plan"]),
         ("Marketing Angles", action_plan["marketing_angles"]),
-    ]:
-        st.markdown(f"**{label}**")
-        for item in items:
-            st.write(f"- {item}")
+    ]
+    for label, items in sections:
+        items_html = "".join(f"<li>{item}</li>" for item in items)
+        st.markdown(
+            f"""
+            <div class="action-section">
+                <div class="action-section-title">{label}</div>
+                <ul>{items_html}</ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_history(history: list[dict[str, object]]) -> str | None:
@@ -352,6 +394,19 @@ def render_history(history: list[dict[str, object]]) -> str | None:
         format_func=lambda value: labels.get(value, "Current session"),
     )
     return selected or None
+
+
+def _render_reasoning(product: dict[str, object]) -> None:
+    sections = [
+        ("Quick Read", product.get("surface_reasoning", "")),
+        ("Deeper Take", product.get("deep_reasoning", "")),
+        ("Strategic Fit", product.get("strategic_reasoning", "")),
+    ]
+    for label, text in sections:
+        if text:
+            st.markdown(f"**{label}**")
+            st.markdown(f"<div class='muted'>{text}</div>", unsafe_allow_html=True)
+            st.markdown("")
 
 
 def _badges(product: dict[str, object]) -> str:
@@ -370,7 +425,7 @@ def _badges(product: dict[str, object]) -> str:
 def _history_label(entry: dict[str, object]) -> str:
     request = entry.get("request", {})
     niche = request.get("niche") or "All niches"
-    return f"{entry['created_at']} | {request.get('platform', 'Platform')} | {niche}"
+    return f"{entry['created_at']} · {request.get('platform', 'Platform')} · {niche}"
 
 
 def _nested_name(payload: dict[str, object] | None) -> str:
