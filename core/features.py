@@ -52,9 +52,12 @@ def engineer_features(frame: pd.DataFrame, request: ResearchRequest, context: Co
     )
     engineered["break_even_ad_cost"] = engineered["pre_ad_contribution_margin"].clip(lower=0.0)
 
+    # Use only the original niche (not all expanded query terms) for a tight
+    # relevance signal.  Expanded terms are for discovery breadth, not fit scoring.
+    niche_queries = [request.niche] if request.niche else []
     engineered["niche_fit"] = engineered.apply(
         lambda row: best_query_match_score(
-            [request.niche, *context.query_terms],
+            niche_queries,
             [row["name"], row["category"], " ".join(row["keywords"])],
         )
         if request.niche
