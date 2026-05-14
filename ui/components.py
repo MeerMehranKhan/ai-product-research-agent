@@ -88,10 +88,21 @@ def render_run_story(run: dict[str, object]) -> None:
     insights = run.get("run_insights", {})
     st.markdown('<div class="section-header">Run-Level Insights</div>', unsafe_allow_html=True)
     insight_cols = st.columns(4)
-    insight_cols[0].metric("Best Opportunity", _nested_name(insights.get("best_opportunity")))
-    insight_cols[1].metric("Safest Opportunity", _nested_name(insights.get("safest_opportunity")))
-    insight_cols[2].metric("Most Overlooked", _nested_name(insights.get("most_overlooked_opportunity")))
-    insight_cols[3].metric("Outcome", str(run.get("outcome", "")).title())
+    for col, label, value in [
+        (insight_cols[0], "Best Opportunity", _nested_name(insights.get("best_opportunity"))),
+        (insight_cols[1], "Safest Opportunity", _nested_name(insights.get("safest_opportunity"))),
+        (insight_cols[2], "Most Overlooked", _nested_name(insights.get("most_overlooked_opportunity"))),
+        (insight_cols[3], "Outcome", str(run.get("outcome", "")).title()),
+    ]:
+        col.markdown(
+            f"""
+            <div class="insight-cell">
+                <div class="insight-label">{label}</div>
+                <div class="insight-value">{value}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     if insights.get("biggest_red_flag"):
         st.warning(f"Biggest red flag: {insights['biggest_red_flag']}")
     if insights.get("adjacent_niche_suggestion"):

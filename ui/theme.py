@@ -273,6 +273,27 @@ def inject_theme() -> None:
                 border-color: rgba(148, 163, 184, 0.20);
             }
 
+            /* ── Insight cells (non-truncating metrics) ───────── */
+            .insight-cell {
+                padding: 0.3rem 0;
+            }
+            .insight-label {
+                font-size: 0.72rem;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: #64748b;
+                margin-bottom: 0.25rem;
+            }
+            .insight-value {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #f1f5f9;
+                line-height: 1.3;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
             /* ── Action plan cards ────────────────────────────── */
             .action-section {
                 background: rgba(15, 23, 42, 0.40);
