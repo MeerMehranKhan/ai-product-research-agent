@@ -115,9 +115,22 @@ ADJACENT_TERMS = {
     "massage": ["self care", "recovery", "beauty", "wellness"],
     "cable": ["desk setup", "organization", "office", "workspace"],
     "projector": ["gadget", "tech", "entertainment", "home theater"],
-    "phone": ["phone case", "tech accessory", "mobile", "gadget"],
+    "phone": ["phone case", "phone accessories", "phone mount", "charger", "mobile accessory", "magsafe"],
+    "cases": ["phone case", "phone accessories", "shockproof", "clear case", "mobile"],
     "laptop": ["laptop stand", "desk setup", "remote work", "ergonomic"],
     "usb": ["usb hub", "tech accessory", "desk setup", "connectivity"],
+    "led": ["led lights", "rgb", "room decor", "lighting", "lamp"],
+    "lights": ["led lights", "rgb", "room decor", "sunset lamp", "lighting"],
+    "sports": ["resistance bands", "running belt", "workout", "exercise", "fitness"],
+    "outdoor": ["camping", "hiking", "hammock", "headlamp", "adventure"],
+    "camping": ["outdoor", "headlamp", "portable", "hiking", "tent"],
+    "jewelry": ["necklace", "ring", "bracelet", "earring", "fashion"],
+    "necklace": ["jewelry", "layered", "fashion", "pendant"],
+    "ring": ["jewelry", "anxiety ring", "fidget", "fashion"],
+    "stationery": ["planner", "notebook", "washi tape", "craft", "organization"],
+    "planner": ["stationery", "notebook", "productivity", "organization"],
+    "charger": ["wireless charger", "phone accessories", "charging pad", "tech"],
+    "mount": ["phone mount", "car mount", "magnetic", "phone accessories"],
 }
 
 GENERIC_DISCOVERY_TERMS = [

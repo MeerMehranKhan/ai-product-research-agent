@@ -36,7 +36,7 @@ CATEGORY_SYNONYMS: dict[str, set[str]] = {
     "pet": {"pet care", "pet", "dog", "cat", "puppy", "shedding"},
     "beauty": {"beauty", "skincare", "makeup", "cosmetic", "self care", "scalp", "face", "eyelash"},
     "kitchen": {"kitchen", "cooking", "meal prep", "food", "blender"},
-    "fitness": {"fitness", "gym", "workout", "exercise", "recovery", "wellness"},
+    "fitness": {"fitness", "gym", "workout", "exercise", "recovery", "wellness", "sports"},
     "office": {"office", "desk", "workspace", "remote work"},
     "home": {"home", "household", "organization"},
     "tech": {"tech", "electronic", "gadget", "smart"},
@@ -46,6 +46,14 @@ CATEGORY_SYNONYMS: dict[str, set[str]] = {
     "auto": {"auto", "car", "vehicle", "automotive"},
     "grooming": {"grooming", "pet care", "pet", "shedding", "brush"},
     "cleaning": {"cleaning", "lint", "vacuum", "scrubber"},
+    "phone": {"phone accessories", "phone case", "phone", "mobile", "smartphone", "charger", "magsafe"},
+    "cases": {"phone case", "phone accessories", "case", "cover", "shockproof"},
+    "led": {"led lighting", "led", "lamp", "lights", "rgb"},
+    "lighting": {"led lighting", "lamp", "lights", "rgb", "projection"},
+    "sports": {"sports", "fitness", "exercise", "running", "workout", "resistance bands"},
+    "outdoor": {"outdoor", "camping", "hiking", "headlamp", "trail"},
+    "jewelry": {"jewelry", "necklace", "ring", "bracelet", "earring"},
+    "stationery": {"stationery", "planner", "notebook", "washi tape", "craft"},
 }
 
 
