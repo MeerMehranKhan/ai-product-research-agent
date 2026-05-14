@@ -49,7 +49,7 @@ def initial_query_terms(niche: str) -> list[str]:
         terms = [niche.strip()]
         for token, extras in ADJACENT_TERMS.items():
             if token in normalized:
-                terms.extend(extras[:2])
+                terms.extend(extras[:4])
         return list(dict.fromkeys(terms))
     return GENERIC_DISCOVERY_TERMS.copy()
 
