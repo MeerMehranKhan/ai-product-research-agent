@@ -32,6 +32,22 @@ GENERIC_QUERY_TOKENS = {
     "use",
 }
 
+CATEGORY_SYNONYMS: dict[str, set[str]] = {
+    "pet": {"pet care", "pet", "dog", "cat", "puppy"},
+    "beauty": {"beauty", "skincare", "makeup", "cosmetic", "self care"},
+    "kitchen": {"kitchen", "cooking", "meal prep", "food"},
+    "fitness": {"fitness", "gym", "workout", "exercise", "recovery", "wellness"},
+    "office": {"office", "desk", "workspace", "remote work"},
+    "home": {"home", "household", "cleaning", "organization"},
+    "tech": {"tech", "electronic", "gadget", "smart"},
+    "travel": {"travel", "commuter", "portable", "car"},
+    "baby": {"baby", "infant", "parenting", "child"},
+    "garden": {"garden", "plant", "outdoor"},
+    "auto": {"auto", "car", "vehicle", "automotive"},
+    "grooming": {"grooming", "pet care", "beauty", "self care", "cleaning"},
+    "cleaning": {"cleaning", "home", "lint", "vacuum", "scrubber"},
+}
+
 
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
@@ -95,6 +111,8 @@ def niche_match_score(niche: str, candidates: list[str]) -> float:
 
     candidate_token_set = set(candidate_tokens)
     candidate_text = " ".join(candidate_tokens)
+    # Also check raw candidate text for category-level matching
+    raw_candidate_text = " ".join(normalize_text(c) for c in candidates)
     best_score = 0.0
     for phrase in phrases:
         phrase_tokens = _semantic_tokens(phrase)
@@ -103,13 +121,49 @@ def niche_match_score(niche: str, candidates: list[str]) -> float:
 
         phrase_text = " ".join(phrase_tokens)
         overlap = len(set(phrase_tokens) & candidate_token_set)
-        min_required = 1 if len(phrase_tokens) == 1 else 2
+
+        # Check for category synonym matches
+        synonym_bonus = _category_synonym_bonus(phrase_tokens, candidate_token_set, raw_candidate_text)
+
+        # For exact substring match, give full score
         if phrase_text and phrase_text in candidate_text:
             best_score = max(best_score, 100.0)
             continue
+
+        # Accept single token overlap for multi-word phrases when there is
+        # also a category synonym match
+        min_required = 1 if len(phrase_tokens) == 1 else (1 if synonym_bonus > 0 else 2)
         if overlap >= min_required:
-            best_score = max(best_score, 100.0 * safe_divide(overlap, len(phrase_tokens), 0.0))
+            raw_score = 100.0 * safe_divide(overlap, len(phrase_tokens), 0.0)
+            best_score = max(best_score, min(100.0, raw_score + synonym_bonus))
+        elif synonym_bonus > 0:
+            # Even with zero direct token overlap, strong category synonym
+            # match should return a meaningful score
+            best_score = max(best_score, synonym_bonus)
     return best_score
+
+
+def _category_synonym_bonus(phrase_tokens: list[str], candidate_tokens: set[str], raw_candidate_text: str) -> float:
+    """Return a bonus score (0-50) when phrase tokens map to a category synonym group
+    that also covers one or more candidate tokens."""
+    bonus = 0.0
+    for token in phrase_tokens:
+        related = CATEGORY_SYNONYMS.get(token)
+        if not related:
+            continue
+        # Check if any candidate token or raw text belongs to the same synonym group
+        for synonym in related:
+            syn_tokens = set(normalize_text(synonym).split())
+            # For multi-word synonyms, require ALL tokens to be present
+            if len(syn_tokens) > 1:
+                if syn_tokens.issubset(candidate_tokens) or synonym in raw_candidate_text:
+                    bonus = max(bonus, 40.0)
+                    break
+            else:
+                if syn_tokens & candidate_tokens:
+                    bonus = max(bonus, 40.0)
+                    break
+    return bonus
 
 
 def best_query_match_score(queries: list[str], candidates: list[str]) -> float:
