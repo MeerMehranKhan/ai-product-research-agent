@@ -59,7 +59,7 @@ def prepare_candidates(
         axis=1,
     )
     if request.niche:
-        relevant_mask = frame["search_match"] >= 20.0
+        relevant_mask = frame["search_match"] >= 12.0
         frame = frame[relevant_mask].copy()
     if frame.empty:
         return frame
@@ -69,7 +69,7 @@ def prepare_candidates(
     frame["price_band"] = (frame["price"] / 5.0).round()
     platform_column = PLATFORM_FIT_COLUMNS.get(context.platform, "platform_fit_other")
     frame["platform_fit_score"] = frame[platform_column].fillna(frame["platform_fit_other"]).astype(float)
-    frame["dedupe_key"] = frame["normalized_name"] + "|" + frame["normalized_category"] + "|" + frame["price_band"].astype(str)
+    frame["dedupe_key"] = frame["normalized_name"] + "|" + frame["normalized_category"]
 
     grouped_rows = []
     for _, group in frame.groupby("dedupe_key", as_index=False):
