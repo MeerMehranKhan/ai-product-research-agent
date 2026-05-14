@@ -1,6 +1,8 @@
 __pycache__/
 .pytest_cache/
+.pytest_runtime_tmp/
 .streamlit/
 .vendor/
+.venv/
 data/exports/
 storage/*.db
