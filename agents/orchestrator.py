@@ -95,6 +95,10 @@ class ProductResearchOrchestrator:
                 snapshot_key = "amazon_snapshot" if request.platform == "Amazon" else "aliexpress_snapshot"
                 snapshot_candidates = self.adapters[snapshot_key].discover(request, context, context.query_terms)
                 candidates.extend(snapshot_candidates)
+                # Also try the other snapshot for broader coverage
+                other_snapshot_key = "aliexpress_snapshot" if snapshot_key == "amazon_snapshot" else "amazon_snapshot"
+                other_snapshot_candidates = self.adapters[other_snapshot_key].discover(request, context, context.query_terms)
+                candidates.extend(other_snapshot_candidates)
                 processed = prepare_candidates(candidates, request, context)
                 emit("data_discovery", "info", f"Snapshot discovery increased the cleaned pool to {len(processed.index)}.", source="snapshot")
 
@@ -296,15 +300,27 @@ class ProductResearchOrchestrator:
     ) -> list[dict[str, object]]:
         if scored.empty:
             return []
+        # Composite ranking: blend opportunity score with niche relevance
+        scored = scored.copy()
+        scored["_rank_score"] = 0.65 * scored["opportunity_score"] + 0.35 * scored["niche_fit"]
         ranked = scored.sort_values(
-            ["opportunity_score", "confidence_score", "discovery_gap_score", "estimated_profit_per_unit"],
+            ["_rank_score", "opportunity_score", "confidence_score", "discovery_gap_score"],
             ascending=False,
         )
         selected_rows = []
         category_counts: dict[str, int] = {}
+        # Allow more products from niche-relevant categories
+        niche_relevant_categories = set()
+        if request.niche:
+            median_fit = ranked["niche_fit"].median()
+            high_fit = ranked[ranked["niche_fit"] > median_fit]
+            niche_relevant_categories = set(high_fit["category"].unique())
         for row in ranked.to_dict(orient="records"):
             category = str(row["category"])
-            if category_counts.get(category, 0) >= 1 and len(selected_rows) < request.top_n and ranked["category"].nunique() > 2:
+            max_for_cat = 3 if category in niche_relevant_categories else 2
+            if ranked["category"].nunique() <= 2:
+                max_for_cat = request.top_n
+            if category_counts.get(category, 0) >= max_for_cat and len(selected_rows) < request.top_n:
                 continue
             category_counts[category] = category_counts.get(category, 0) + 1
             selected_rows.append(row)
