@@ -313,7 +313,11 @@ class ProductResearchOrchestrator:
                     ["_rank_score", "opportunity_score", "confidence_score"],
                     ascending=False,
                 )
-            # Only fall back to off-topic products when on-topic pool is very sparse
+            # When NO on-topic products exist, return empty to trigger the
+            # "No Strong Matches" message instead of surfacing random products.
+            if on_topic.empty:
+                return []
+            # Only fall back to off-topic products when on-topic pool is very sparse (1-2)
             if len(on_topic) >= 3:
                 ranked = on_topic
             else:
