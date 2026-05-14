@@ -317,12 +317,9 @@ class ProductResearchOrchestrator:
             # "No Strong Matches" message instead of surfacing random products.
             if on_topic.empty:
                 return []
-            # Only fall back to off-topic products when on-topic pool is very sparse (1-2)
-            if len(on_topic) >= 3:
-                ranked = on_topic
-            else:
-                off_topic["_rank_score"] = off_topic["opportunity_score"] * 0.5
-                ranked = pd.concat([on_topic, off_topic]).sort_values("_rank_score", ascending=False)
+            # Use only on-topic products — better to show fewer relevant
+            # results than to pad with off-topic items.
+            ranked = on_topic
         else:
             scored["_rank_score"] = scored["opportunity_score"]
             ranked = scored.sort_values(
